@@ -12,6 +12,7 @@ import java.util.List;
 import org.jlplayel.royalty.dao.EpisodeDao;
 import org.jlplayel.royalty.dao.StudioDao;
 import org.jlplayel.royalty.model.Payment;
+import org.jlplayel.royalty.model.Studio;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -55,22 +56,21 @@ public class RoyaltyServiceImplTest {
     @Test
     public void testGetAllStudioPayments(){
         
-        Payment payment1 = new Payment();
-        payment1.setRightsOwnerId("test2_rightsOwnerId1");
-        payment1.setRightsOwner("test2_rightsOwner1");
-        payment1.setViewings(7);
-        payment1.setPaymentUnit(new BigDecimal("10.13"));
+        Studio studio1 = new Studio();
+        studio1.setId("test2_rightsOwnerId1");
+        studio1.setName("test2_rightsOwner1");
+        studio1.setPaymentUnit(new BigDecimal("10.13"));
+        studio1.setTotalViewing(7);
         
-        Payment payment2 = new Payment();
-        payment2.setRightsOwnerId("test2_rightsOwnerId2");
-        payment2.setRightsOwner("test2_rightsOwner2");
-        payment2.setViewings(10);
-        payment2.setPaymentUnit(new BigDecimal("1.17"));
+        Studio studio2 = new Studio();
+        studio2.setId("test2_rightsOwnerId2");
+        studio2.setName("test2_rightsOwner2");
+        studio2.setPaymentUnit(new BigDecimal("1.17"));
+        studio2.setTotalViewing(10);
         
         
-        
-        Mockito.when( studioDao.getAllStudioPayments() )
-               .thenReturn(Arrays.asList(payment1, payment2));
+        Mockito.when( studioDao.find(Mockito.any()) )
+               .thenReturn(Arrays.asList(studio1, studio2));
         
         List<Payment> payments = royaltyService.getAllStudioPayments();
         
@@ -89,23 +89,21 @@ public class RoyaltyServiceImplTest {
     @Test
     public void testGetPaymentsWithoutRightsOwnerId(){
         
-        Payment payment = new Payment();
-        payment.setRightsOwnerId("test3_rightsOwnerId1");
-        payment.setRightsOwner("test3_rightsOwner1");
-        payment.setViewings(100);
-        payment.setPaymentUnit(new BigDecimal("1.17"));
-        
-        
-        
-        Mockito.when( studioDao.findStudioPayments(Mockito.anyString()) )
-               .thenReturn(payment);
+        Studio studio = new Studio();
+        studio.setId("test3_rightsOwnerId1");
+        studio.setName("test3_rightsOwner1");
+        studio.setPaymentUnit(new BigDecimal("1.17"));
+        studio.setTotalViewing(100);
+
+        Mockito.when( studioDao.find(Mockito.anyString()) )
+               .thenReturn(Arrays.asList(studio));
         
         Payment result = royaltyService.getPaymentsWithoutRightsOwnerId("test3");
         
         assertNull(result.getRightsOwnerId());
-        assertTrue( payment.getRoyalty().compareTo(new BigDecimal("117.00")) == 0);
-        assertNotNull(payment.getRightsOwner());
-        assertNotNull(payment.getViewings());
+        assertTrue( result.getRoyalty().compareTo(new BigDecimal("117.00")) == 0);
+        assertNotNull(result.getRightsOwner());
+        assertNotNull(result.getViewings());
     }
     
     

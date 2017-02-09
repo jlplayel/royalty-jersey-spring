@@ -2,7 +2,6 @@ package org.jlplayel.royalty.model;
 
 import java.math.BigDecimal;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -19,16 +18,6 @@ public class Payment {
     private BigDecimal royalty;
     private int viewings;
     
-    @JsonIgnore
-    private BigDecimal paymentUnit;
-    
-    public BigDecimal getPaymentUnit() {
-        return paymentUnit;
-    }
-    
-    public void setPaymentUnit(BigDecimal paymentUnit) {
-        this.paymentUnit = paymentUnit;
-    }
     
     public String getRightsOwnerId() {
         return rightsOwnerId;

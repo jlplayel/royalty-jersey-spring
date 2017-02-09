@@ -8,6 +8,7 @@ public class Studio {
     private String id;
     private String name;
     private BigDecimal paymentUnit;
+    private int totalViewing;
     
     public String getId() {
         return id;
@@ -31,6 +32,14 @@ public class Studio {
     
     public void setPaymentUnit(BigDecimal paymentUnit) {
         this.paymentUnit = paymentUnit;
+    }
+
+    public int getTotalViewing() {
+        return totalViewing;
+    }
+
+    public void setTotalViewing(int totalViewing) {
+        this.totalViewing = totalViewing;
     }
     
     

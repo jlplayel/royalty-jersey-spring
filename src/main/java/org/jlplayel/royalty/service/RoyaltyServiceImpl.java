@@ -37,44 +37,52 @@ public class RoyaltyServiceImpl implements RoyaltyService {
     @Override
     public List<Payment> getAllStudioPayments(){
         
-        List<Payment> payments = studioDao.getAllStudioPayments();
-        
-        payments = addTotalRoyaltyAmount( payments );
+        List<Studio> studios = studioDao.find(null);
  
-        return payments;
+        return getAllPayments( studios );
     }
 
 
     @Override
     public Payment getPaymentsWithoutRightsOwnerId(String studioId) {
-        Payment payment = studioDao.findStudioPayments(studioId);
+        
+        List<Studio> studios = studioDao.find(studioId);
+        
+        if(studios.size()==0){
+            return null;
+        }
+            
+        Payment payment = getTotalPaymentOf( studios.get(0) );
         
         if( payment!=null ){
             payment.setRightsOwnerId(null);
-            payment = addTotalRoyaltyAmount(payment);
         }
         
         return payment;
     }
     
     
-    private List<Payment> addTotalRoyaltyAmount( List<Payment> payments ){
+    private List<Payment> getAllPayments( List<Studio> studios ){
         
-        payments.parallelStream()
-                .map( p -> addTotalRoyaltyAmount(p)).collect(Collectors.toList());
+        List<Payment> payments = studios.parallelStream()
+               .map( s -> getTotalPaymentOf(s)).collect(Collectors.toList());
         
         return payments;
     }
     
     
-    private Payment addTotalRoyaltyAmount( Payment payment ){
+    private Payment getTotalPaymentOf( Studio studio ){
         
-        BigDecimal royalty = payment.getPaymentUnit()
-                                    .multiply(BigDecimal.valueOf(payment.getViewings()));
+        BigDecimal royalty = studio.getPaymentUnit()
+                                   .multiply(BigDecimal.valueOf(studio.getTotalViewing()));
         
-        payment.setRoyalty(royalty);
+        Payment result = new Payment();
+        result.setRightsOwnerId(studio.getId());
+        result.setRightsOwner(studio.getName());
+        result.setViewings(studio.getTotalViewing());
+        result.setRoyalty(royalty);
         
-        return payment;
+        return result;
     }
 
 

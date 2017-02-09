@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.jlplayel.royalty.model.Payment;
 import org.jlplayel.royalty.model.Studio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -16,9 +15,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class StudioDaoImpl implements StudioDao{
-    
-    private static final String PAYMENT_SELECT = 
-            "SELECT ID, NAME, TOTAL_VIEWING, PAYMENT_UNIT FROM STUDIO ";
  
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -54,21 +50,27 @@ public class StudioDaoImpl implements StudioDao{
         sqlParameters.add(studio.getId());
         sqlParameters.add(studio.getName());
         sqlParameters.add(studio.getPaymentUnit().toString());
-        sqlParameters.add(0);
+        sqlParameters.add(studio.getTotalViewing());
         
         return jdbcTemplate.update(insertSql.toString(), sqlParameters.toArray());
     }
     
     
     @Override
-    public Studio find(String id) {
+    public List<Studio> find(String id) {
         
         StringBuilder query = new StringBuilder();  
-        query.append("SELECT ID, NAME, PAYMENT_UNIT FROM STUDIO ");
-        query.append("WHERE ID = ? ");
+        query.append("SELECT ID, NAME, PAYMENT_UNIT, TOTAL_VIEWING FROM STUDIO ");
+        
+        Object[] params = new Object[0];
+        
+        if(id!=null){
+            query.append("WHERE ID = ? ");
+            params = new Object[]{id};
+        }
         
         List<Studio> studios = jdbcTemplate.query(query.toString(),
-                                             new Object[] { id }, 
+                                             params, 
                                              new RowMapper<Studio>() 
                     {
                         public Studio mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -76,15 +78,12 @@ public class StudioDaoImpl implements StudioDao{
                             studio.setId(rs.getString("ID"));
                             studio.setName(rs.getString("NAME"));
                             studio.setPaymentUnit(rs.getBigDecimal("PAYMENT_UNIT"));
+                            studio.setTotalViewing(rs.getInt("TOTAL_VIEWING"));
                             return studio;
                         }
                     });
         
-        if(studios.size()==0){
-            return null;
-        }
-        
-        return studios.get(0);
+        return studios;
     }
     
     
@@ -95,32 +94,6 @@ public class StudioDaoImpl implements StudioDao{
         query.append("WHERE ID = ? ");
         
         return jdbcTemplate.update(query.toString(), new Object[] { studioId });
-    }
-    
-    
-    @Override
-    public Payment findStudioPayments( String studioId ){
-        
-        StringBuilder query = new StringBuilder();
-        query.append(PAYMENT_SELECT);
-        query.append("WHERE ID = ? ");
-        
-        List<Payment> payments = jdbcTemplate.query(query.toString(),
-                                                    new Object[] { studioId }, 
-                                                    new PaymentRowMapper());
-        
-        if(payments.size()==0){
-            return null;
-        }
-        
-        return payments.get(0);
-        
-    }
-    
-    @Override
-    public List<Payment> getAllStudioPayments(){
-        
-        return jdbcTemplate.query(PAYMENT_SELECT, new PaymentRowMapper());
     }
 
 

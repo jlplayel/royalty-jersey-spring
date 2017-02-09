@@ -2,15 +2,12 @@ package org.jlplayel.royalty.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
 import org.jlplayel.royalty.config.SpringConfiguration;
-import org.jlplayel.royalty.model.Payment;
 import org.jlplayel.royalty.model.Studio;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,7 +46,8 @@ public class StudioDaoImplTest {
         Studio studio = new Studio();
         studio.setId("0004d");
         studio.setName("TV Show TestInsert");
-        studio.setPaymentUnit(new BigDecimal("105.19"));;
+        studio.setPaymentUnit(new BigDecimal("105.19"));
+        studio.setTotalViewing(123);
         
         int recordNum = studioDao.insert(studio);
         
@@ -58,12 +56,13 @@ public class StudioDaoImplTest {
     
     
     @Test(expected = Exception.class)
-    public void testInsert_withExistingSamePreviosId() {
+    public void testInsert_duplicateStudio() {
         
         Studio studio = new Studio();
         studio.setId(VALID_STUDIO_ID);
         studio.setName("TV Show TestInsert");
         studio.setPaymentUnit(new BigDecimal("1.01"));
+        studio.setTotalViewing(0);
         
         studioDao.insert(studio);
     }
@@ -72,20 +71,30 @@ public class StudioDaoImplTest {
     @Test
     public void testFind_existingRecord() {
         
-        Studio studio = studioDao.find(VALID_STUDIO_ID);
+        List<Studio> studios = studioDao.find(VALID_STUDIO_ID);
         
-        assertEquals("One insertion was expected.", VALID_STUDIO_ID, studio.getId());
-        assertNotNull(studio.getName());
-        assertEquals(new BigDecimal("11.01"), studio.getPaymentUnit());
+        assertEquals("One found studio was expected.", 1, studios.size());
+        assertEquals("Id should match.", VALID_STUDIO_ID, studios.get(0).getId());
+        assertNotNull(studios.get(0).getName());
+        assertEquals(new BigDecimal("11.01"), studios.get(0).getPaymentUnit());
     }
     
     
     @Test
     public void testFind_notExistingRecord() {
         
-        Studio studio = studioDao.find(NO_VALID_STUDIO_ID);
+        List<Studio> studio = studioDao.find(NO_VALID_STUDIO_ID);
 
-        assertNull(studio);
+        assertEquals(0,studio.size());
+    }
+    
+    @Test
+    public void testFind_noId(){
+        
+        List<Studio> studios = studioDao.find(null);
+        
+        assertNotNull(studios);
+        assertEquals(3, studios.size());
     }
     
     
@@ -99,34 +108,16 @@ public class StudioDaoImplTest {
     
     
     @Test
-    public void testGetAllStudioPayments(){
-        
-        List<Payment> payments = studioDao.getAllStudioPayments();
-        
-        assertTrue( "There should be at least 3 initial studio-payment.",
-                    payments.size()>=3 );
-    }
-    
-    
-    @Test
-    public void testFindStudioPayments(){
-        Payment payment = studioDao.findStudioPayments(VALID_STUDIO_ID);
-        
-        assertNotNull("There should be a payment for a valid studio.", payment);
-        assertEquals(new BigDecimal("11.01"), payment.getPaymentUnit());
-    }
-    
-    @Test
     public void testIncreaseOneTotalViewingAndFindStudioPayments(){
         
-        Payment payment = studioDao.findStudioPayments(VALID_STUDIO_ID);
-        int initialViewings = payment.getViewings();
+        List<Studio> studios = studioDao.find(VALID_STUDIO_ID);
+        int initialViewings = studios.get(0).getTotalViewing();
         
         studioDao.increaseOneTotalViewing(VALID_STUDIO_ID);
         
-        payment = studioDao.findStudioPayments(VALID_STUDIO_ID);
+        studios = studioDao.find(VALID_STUDIO_ID);
         
-        assertEquals(initialViewings + 1, payment.getViewings());   
+        assertEquals(initialViewings + 1, studios.get(0).getTotalViewing());   
     }
     
     
