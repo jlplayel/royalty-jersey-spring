@@ -126,7 +126,7 @@ public class RoyaltyControllerTest extends JerseySpringTest{
         payment.setRoyalty( new BigDecimal("15000.23") );
         payment.setViewings(123);
         
-        Mockito.when( royaltyService.getPaymentsWithoutRightsOwnerId(Mockito.anyString()) )
+        Mockito.when( royaltyService.getStudioPayment(Mockito.anyString(), Mockito.anyBoolean()) )
                .thenReturn(payment);
         
         
@@ -145,7 +145,7 @@ public class RoyaltyControllerTest extends JerseySpringTest{
     @Test
     public void testGetPayments_withoutExistingStudioId() {
         
-        Mockito.when( royaltyService.getPaymentsWithoutRightsOwnerId(Mockito.anyString()) )
+        Mockito.when( royaltyService.getStudioPayment(Mockito.anyString(), Mockito.anyBoolean()) )
                .thenReturn(null);
         
         

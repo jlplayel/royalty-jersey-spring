@@ -2,6 +2,7 @@ package org.jlplayel.royalty.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -69,29 +70,37 @@ public class StudioDaoImplTest {
     
     
     @Test
-    public void testFind_existingRecord() {
+    public void testFindBy_existingRecord() {
         
-        List<Studio> studios = studioDao.find(VALID_STUDIO_ID);
+        Studio studio = studioDao.findBy(VALID_STUDIO_ID);
         
-        assertEquals("One found studio was expected.", 1, studios.size());
-        assertEquals("Id should match.", VALID_STUDIO_ID, studios.get(0).getId());
-        assertNotNull(studios.get(0).getName());
-        assertEquals(new BigDecimal("11.01"), studios.get(0).getPaymentUnit());
+        assertNotNull("One found studio was expected.", studio);
+        assertEquals("Id should match.", VALID_STUDIO_ID, studio.getId());
+        assertNotNull(studio.getName());
+        assertEquals(new BigDecimal("11.01"), studio.getPaymentUnit());
     }
     
     
     @Test
-    public void testFind_notExistingRecord() {
+    public void testFindBy_notExistingRecord() {
         
-        List<Studio> studio = studioDao.find(NO_VALID_STUDIO_ID);
+        Studio studio = studioDao.findBy(NO_VALID_STUDIO_ID);
 
-        assertEquals(0,studio.size());
+        assertNull(studio);
     }
     
-    @Test
-    public void testFind_noId(){
+    
+    @Test(expected=Exception.class)
+    public void testFindBy_nullIdAttribute() {
         
-        List<Studio> studios = studioDao.find(null);
+        studioDao.findBy(null);
+    }
+    
+    
+    @Test
+    public void testFindAll(){
+        
+        List<Studio> studios = studioDao.findAll();
         
         assertNotNull(studios);
         assertEquals(3, studios.size());
@@ -110,14 +119,14 @@ public class StudioDaoImplTest {
     @Test
     public void testIncreaseOneTotalViewingAndFindStudioPayments(){
         
-        List<Studio> studios = studioDao.find(VALID_STUDIO_ID);
-        int initialViewings = studios.get(0).getTotalViewing();
+        Studio studio = studioDao.findBy(VALID_STUDIO_ID);
+        int initialViewings = studio.getTotalViewing();
         
         studioDao.increaseOneTotalViewing(VALID_STUDIO_ID);
         
-        studios = studioDao.find(VALID_STUDIO_ID);
+        studio = studioDao.findBy(VALID_STUDIO_ID);
         
-        assertEquals(initialViewings + 1, studios.get(0).getTotalViewing());   
+        assertEquals(initialViewings + 1, studio.getTotalViewing());   
     }
     
     
@@ -137,6 +146,22 @@ public class StudioDaoImplTest {
         int recordNum = studioDao.addStudios(Arrays.asList(studio1, studio2));
         
         assertEquals("Two insertions was expected.", 2, recordNum);
+    }
+    
+    
+    @Test
+    public void testResetAllStudioVisualizations(){
+        
+        studioDao.increaseOneTotalViewing(VALID_STUDIO_ID);   
+        
+        studioDao.resetAllStudioVisualizations();
+        
+        List<Studio> studios = studioDao.findAll();
+        
+        for(Studio studio: studios){
+            assertEquals(0, studio.getTotalViewing());
+        }
+        
     }
     
     

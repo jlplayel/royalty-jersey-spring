@@ -8,11 +8,13 @@ public interface StudioDao {
     
     public int insert(Studio studio);
     
-    public List<Studio> find(String id);
+    public Studio findBy(String id);
+    
+    public List<Studio> findAll();
     
     public int increaseOneTotalViewing(String studioId);
     
-    public int setAllTotalViewingToZero();
+    public int resetAllStudioVisualizations();
     
     public int addStudios(List<Studio> studios);
 }

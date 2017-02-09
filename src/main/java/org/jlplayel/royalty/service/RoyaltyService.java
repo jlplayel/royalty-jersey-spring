@@ -12,7 +12,7 @@ public interface RoyaltyService {
     
     public List<Payment> getAllStudioPayments();
     
-    public Payment getPaymentsWithoutRightsOwnerId(String studioId);
+    public Payment getStudioPayment(String studioId, boolean withStudioId);
     
     public void resetAllTotalViewings();
     

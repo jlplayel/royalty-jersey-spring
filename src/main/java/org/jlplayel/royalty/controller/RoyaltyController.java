@@ -63,7 +63,7 @@ public class RoyaltyController {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getPayments( @PathParam("ownerID") String ownerID ){
         
-        Payment payment = royaltyService.getPaymentsWithoutRightsOwnerId(ownerID);
+        Payment payment = royaltyService.getStudioPayment(ownerID, false);
         
         if( payment==null ){
             return Response.status(Response.Status.NOT_FOUND)

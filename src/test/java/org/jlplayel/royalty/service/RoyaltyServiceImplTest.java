@@ -69,7 +69,7 @@ public class RoyaltyServiceImplTest {
         studio2.setTotalViewing(10);
         
         
-        Mockito.when( studioDao.find(Mockito.any()) )
+        Mockito.when( studioDao.findAll() )
                .thenReturn(Arrays.asList(studio1, studio2));
         
         List<Payment> payments = royaltyService.getAllStudioPayments();
@@ -87,7 +87,7 @@ public class RoyaltyServiceImplTest {
     
     
     @Test
-    public void testGetPaymentsWithoutRightsOwnerId(){
+    public void testGetStudioPayment(){
         
         Studio studio = new Studio();
         studio.setId("test3_rightsOwnerId1");
@@ -95,10 +95,10 @@ public class RoyaltyServiceImplTest {
         studio.setPaymentUnit(new BigDecimal("1.17"));
         studio.setTotalViewing(100);
 
-        Mockito.when( studioDao.find(Mockito.anyString()) )
-               .thenReturn(Arrays.asList(studio));
+        Mockito.when( studioDao.findBy(Mockito.anyString()) )
+               .thenReturn(studio);
         
-        Payment result = royaltyService.getPaymentsWithoutRightsOwnerId("test3");
+        Payment result = royaltyService.getStudioPayment("test3", false);
         
         assertNull(result.getRightsOwnerId());
         assertTrue( result.getRoyalty().compareTo(new BigDecimal("117.00")) == 0);

@@ -57,7 +57,29 @@ public class StudioDaoImpl implements StudioDao{
     
     
     @Override
-    public List<Studio> find(String id) {
+    public Studio findBy(String id){
+        
+        if( id==null || id.length()==0){
+            throw new IllegalArgumentException("StudioID needs a value.");
+        }
+        
+        List<Studio> studios = find(id);
+        
+        if(studios.size()==0){
+            return null;
+        }
+        
+        return find(id).get(0);
+    }
+    
+    
+    @Override
+    public List<Studio> findAll(){
+        return find(null);
+    }
+    
+
+    private List<Studio> find(String id) {
         
         StringBuilder query = new StringBuilder();  
         query.append("SELECT ID, NAME, PAYMENT_UNIT, TOTAL_VIEWING FROM STUDIO ");
@@ -98,7 +120,7 @@ public class StudioDaoImpl implements StudioDao{
 
 
     @Override
-    public int setAllTotalViewingToZero() {
+    public int resetAllStudioVisualizations() {
         StringBuilder query = new StringBuilder();
         query.append("UPDATE STUDIO SET TOTAL_VIEWING = 0 ");
         

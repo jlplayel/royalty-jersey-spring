@@ -37,24 +37,24 @@ public class RoyaltyServiceImpl implements RoyaltyService {
     @Override
     public List<Payment> getAllStudioPayments(){
         
-        List<Studio> studios = studioDao.find(null);
+        List<Studio> studios = studioDao.findAll();
  
         return getAllPayments( studios );
     }
 
 
     @Override
-    public Payment getPaymentsWithoutRightsOwnerId(String studioId) {
+    public Payment getStudioPayment(String studioId, boolean withStudioId) {
         
-        List<Studio> studios = studioDao.find(studioId);
+        Studio studio = studioDao.findBy(studioId);
         
-        if(studios.size()==0){
+        if(studio==null){
             return null;
         }
             
-        Payment payment = getTotalPaymentOf( studios.get(0) );
+        Payment payment = getTotalPaymentOf(studio);
         
-        if( payment!=null ){
+        if( !withStudioId ){
             payment.setRightsOwnerId(null);
         }
         
@@ -88,7 +88,7 @@ public class RoyaltyServiceImpl implements RoyaltyService {
 
     @Override
     public void resetAllTotalViewings() {
-        studioDao.setAllTotalViewingToZero();
+        studioDao.resetAllStudioVisualizations();
     }
 
 
