@@ -29,7 +29,6 @@ Check the build.graddle file for a full list of dependencies and their versions.
  
 FOR DEVELOPERS
 Possible improvements points could be:
-- To add Integration tests.
 - To handle default exceptions with WebApplicationException or ExceptionMappers. 
 - To change the persistence tier to JPA with any implementation and a generic CRUD Dao.
 - To change the attributes in the model for matching the business layer, The result tag can be customized.

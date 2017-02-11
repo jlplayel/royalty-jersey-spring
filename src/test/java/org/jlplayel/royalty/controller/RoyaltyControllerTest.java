@@ -87,7 +87,7 @@ public class RoyaltyControllerTest extends JerseySpringTest{
     
     
     @Test
-    public void testAllPayments() {
+    public void testGetAllPayments() {
         
         Payment payment1 = new Payment();
         payment1.setRightsOwnerId("235lwemf-234r");
