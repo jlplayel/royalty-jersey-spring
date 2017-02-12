@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.ws.rs.client.Entity;
@@ -14,6 +15,7 @@ import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.jlplayel.royalty.config.JerseySpringTest;
+import org.jlplayel.royalty.errorhandler.GenericExceptionMapper;
 import org.jlplayel.royalty.model.CustomerViewing;
 import org.jlplayel.royalty.model.Episode;
 import org.jlplayel.royalty.model.Payment;
@@ -32,6 +34,8 @@ public class RoyaltyControllerTest extends JerseySpringTest{
     private final int HTTP_200_OK_STATUS_CODE = Response.Status.OK.getStatusCode();
     private final int HTTP_202_ACCEPTED_STATUS_CODE = Response.Status.ACCEPTED.getStatusCode();
     private final int HTTP_404_NOT_FOUND = Response.Status.NOT_FOUND.getStatusCode();
+    private final int HTTP_500_INTERNAL_SERVER_ERROR = 
+                                        Response.Status.INTERNAL_SERVER_ERROR.getStatusCode();
     
     private RoyaltyController royaltyController;
     private RoyaltyService royaltyService;
@@ -39,7 +43,8 @@ public class RoyaltyControllerTest extends JerseySpringTest{
     @Override
     protected ResourceConfig configure() {
         royaltyController = new RoyaltyController();
-        return new ResourceConfig().register(royaltyController);
+        return new ResourceConfig().register(royaltyController)
+                                   .register(GenericExceptionMapper.class);
     }
     
     
@@ -216,6 +221,26 @@ public class RoyaltyControllerTest extends JerseySpringTest{
         assertEquals(HTTP_202_ACCEPTED_STATUS_CODE, response.getStatus());
         assertEquals(MediaType.APPLICATION_JSON, response.getMediaType().toString());
         assertEquals("The body should be empty.", 0, response.getLength());
+    }
+    
+    @Test
+    public void testGenericException_addingEpisodes(){
+        Mockito.doThrow(NullPointerException.class)
+               .when(royaltyService).addEpisodes(Mockito.anyList());
+        
+        Response response = target("royaltymanager/episodes")
+                                .request()
+                                .post(Entity.entity(Collections.EMPTY_LIST,
+                                                    MediaType.APPLICATION_JSON));
+        
+        String responseStr = response.readEntity(String.class);
+        
+        assertEquals(HTTP_500_INTERNAL_SERVER_ERROR, response.getStatus());
+        assertEquals(MediaType.APPLICATION_JSON, response.getMediaType().toString());
+        assertTrue(responseStr.contains("status\":500"));
+        assertTrue(responseStr.contains("message\":\"NullPointerException"));
+        assertTrue(responseStr.contains("dateTime\":\"20"));
+        assertTrue(responseStr.contains("uuid\":\""));
     }
 
 }

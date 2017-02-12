@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.jlplayel.royalty.config.JerseySpringTest;
+import org.jlplayel.royalty.errorhandler.GenericExceptionMapper;
 import org.jlplayel.royalty.model.CustomerViewing;
 import org.jlplayel.royalty.model.Episode;
 import org.jlplayel.royalty.model.Studio;
@@ -28,13 +29,16 @@ public class RoyaltyControllerIntegrationTest extends JerseySpringTest {
     private static final int HTTP_200_OK_STATUS_CODE = Response.Status.OK.getStatusCode();
     private static final int HTTP_202_ACCEPTED_STATUS_CODE = Response.Status.ACCEPTED.getStatusCode();
     private static final int HTTP_404_NOT_FOUND = Response.Status.NOT_FOUND.getStatusCode();
+    private final int HTTP_500_INTERNAL_SERVER_ERROR = 
+                                       Response.Status.INTERNAL_SERVER_ERROR.getStatusCode();
     
     private static final String VALID_STUDIO_ID = "InitialStudioId001";
     private static final String VALID_EPISODE_ID = "InitialEpisodeId001";
     
     @Override
     protected ResourceConfig configure(){   
-        return new ResourceConfig(RoyaltyController.class);
+        return new ResourceConfig(RoyaltyController.class)
+                        .register(GenericExceptionMapper.class);
     }
     
     
@@ -183,6 +187,31 @@ public class RoyaltyControllerIntegrationTest extends JerseySpringTest {
         assertEquals(HTTP_202_ACCEPTED_STATUS_CODE, response.getStatus());
         assertEquals(MediaType.APPLICATION_JSON, response.getMediaType().toString());
         assertEquals("The body should be empty.", 0, response.getLength());
+    }
+    
+    
+    @Test
+    public void testGenericException_addingDuplicateStudio(){
+        
+        List<Studio> studios = new ArrayList<>();
+        
+        Studio studio1 = new Studio();
+        studio1.setId(VALID_STUDIO_ID);
+        studio1.setName("Initial Studio Name 001");
+        studio1.setPaymentUnit(new BigDecimal("1.01"));
+        studios.add(studio1);
+        
+        Response response = target("royaltymanager/studios").request()
+        .post(Entity.entity(studios, MediaType.APPLICATION_JSON));
+        
+        String responseStr = response.readEntity(String.class);
+        
+        assertEquals(HTTP_500_INTERNAL_SERVER_ERROR, response.getStatus());
+        assertEquals(MediaType.APPLICATION_JSON, response.getMediaType().toString());
+        assertTrue(responseStr.contains("status\":500"));
+        assertTrue(responseStr.contains("message\":\"DuplicateKeyException"));
+        assertTrue(responseStr.contains("dateTime\":\"20"));
+        assertTrue(responseStr.contains("uuid\":\""));
     }
     
     

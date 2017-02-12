@@ -23,7 +23,7 @@ public class GenericExceptionMapper implements ExceptionMapper<Exception> {
         errorMessage.setDateTime(LocalDateTime.now().toString());
         setHttpStatus(exception, errorMessage);
         errorMessage.setUUID(UUID.randomUUID().toString());
-        setMessageText(exception, errorMessage);
+        errorMessage.setMessage(exception.getClass().getSimpleName());
         
         logger.log(Level.SEVERE, 
                    "Internal error UUID: " + errorMessage.getUUID(),
@@ -37,17 +37,12 @@ public class GenericExceptionMapper implements ExceptionMapper<Exception> {
 
     
     private void setHttpStatus(Exception exception, ErrorMessage errorMessage) {
-        if(exception instanceof WebApplicationException ) {
+        if(exception instanceof WebApplicationException) {
             errorMessage.setStatus(((WebApplicationException)exception).getResponse()
                                                                        .getStatus());
         } else {
             errorMessage.setStatus(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
         }
-    }
-    
-    private void setMessageText(Exception exception, ErrorMessage errorMessage){     
-        int position = exception.getClass().getName().lastIndexOf(".") + 1;     
-        errorMessage.setMessage(exception.getClass().getName().substring(position));
     }
 
 }
